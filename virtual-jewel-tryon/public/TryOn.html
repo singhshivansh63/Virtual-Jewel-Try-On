@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Virtual Necklace Try-On</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      height: 100vh;
+      background-color: #101010;
+      color: #fff;
+    }
+
+    #left-panel {
+      width: 240px;
+      background: linear-gradient(180deg, #1f1f1f, #2c2c2c);
+      border-right: 1px solid #333;
+      overflow-y: auto;
+      padding: 20px 10px;
+    }
+
+    #left-panel h3 {
+      text-align: center;
+      color: #f9c35c;
+      margin-bottom: 25px;
+      font-size: 1.3rem;
+    }
+
+    .necklace-item {
+      cursor: pointer;
+      text-align: center;
+      margin-bottom: 20px;
+      transition: transform 0.2s, box-shadow 0.2s;
+      padding: 10px;
+      border-radius: 8px;
+    }
+
+    .necklace-item:hover {
+      transform: scale(1.05);
+      background-color: #333;
+      box-shadow: 0 0 10px rgba(249, 195, 92, 0.4);
+    }
+
+    .necklace-item img {
+      width: 90px;
+      height: auto;
+      border-radius: 6px;
+      border: 2px solid #f9c35c;
+      background-color: #fff;
+      padding: 4px;
+    }
+
+    .necklace-item div {
+      margin-top: 8px;
+      font-weight: bold;
+      color: #f9c35c;
+    }
+
+    #main-view {
+      flex-grow: 1;
+      position: relative;
+      background-color: black;
+    }
+
+    video, canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    canvas {
+      pointer-events: none;
+    }
+
+    @media (max-width: 768px) {
+      body {
+        flex-direction: column;
+      }
+      #left-panel {
+        width: 100%;
+        height: auto;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        padding: 10px;
+        border-right: none;
+        border-bottom: 1px solid #444;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div id="left-panel">
+  <h3>Select Necklace</h3>
+
+  <div class="necklace-item" onclick="selectNecklace('https://i.ibb.co/pjKwpjXN/Gold-Jewellery-PNG-Picture.png')">
+    <img src="https://i.ibb.co/pjKwpjXN/Gold-Jewellery-PNG-Picture.png" alt="Gold Royal">
+    <div>Gold Royal</div>
+  </div>
+
+  <div class="necklace-item" onclick="selectNecklace('https://i.ibb.co/fGt6Sspd/Chat-GPT-Image-May-7-2025-07-57-45-PM.png')">
+    <img src="https://i.ibb.co/fGt6Sspd/Chat-GPT-Image-May-7-2025-07-57-45-PM.png" alt="Elegant">
+    <div>Elegant</div>
+  </div>
+</div>
+
+<div id="main-view">
+  <video id="video" autoplay muted playsinline></video>
+  <canvas id="overlay"></canvas>
+</div>
+
+<!-- MediaPipe & Camera Utils -->
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+
+<script>
+  const video = document.getElementById('video');
+  const canvas = document.getElementById('overlay');
+  const ctx = canvas.getContext('2d');
+
+  let necklace = new Image();
+  necklace.src = 'https://i.ibb.co/pjKwpjXN/Gold-Jewellery-PNG-Picture.png'; // Default
+
+  function selectNecklace(url) {
+    necklace.src = url;
+  }
+
+  function resizeCanvas() {
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+  }
+
+  const faceMesh = new FaceMesh({
+    locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`
+  });
+
+  faceMesh.setOptions({
+    maxNumFaces: 2,
+    refineLandmarks: true,
+    minDetectionConfidence: 0.5,
+    minTrackingConfidence: 0.5
+  });
+
+  faceMesh.onResults(results => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
+      const landmarks = results.multiFaceLandmarks[0];
+
+      const chin = landmarks[152];
+      const left = landmarks[234];
+      const right = landmarks[454];
+
+      const x = chin.x * canvas.width;
+      const y = chin.y * canvas.height;
+      const faceWidth = (right.x - left.x) * canvas.width;
+      const width = faceWidth * 1.8;
+      const height = width * 0.5;
+
+      ctx.drawImage(necklace, x - width / 2, y - height / 2 + 30, width, height);
+    }
+  });
+
+  async function startCamera() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      video.srcObject = stream;
+
+      video.onloadedmetadata = () => {
+        resizeCanvas();
+        const camera = new Camera(video, {
+          onFrame: async () => {
+            await faceMesh.send({ image: video });
+          },
+          width: video.videoWidth,
+          height: video.videoHeight
+        });
+        camera.start();
+      };
+    } catch (error) {
+      alert("Unable to access the webcam. Please allow camera permissions.");
+      console.error("Camera error:", error);
+    }
+  }
+
+  startCamera();
+</script>
+
+</body>
+</html>

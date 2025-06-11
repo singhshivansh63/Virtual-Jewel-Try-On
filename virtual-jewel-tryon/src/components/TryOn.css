@@ -1,0 +1,60 @@
+/* Include this in your public/index.html <head>:
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+*/
+
+.tryon-container {
+  width: 700px;
+  margin: 0 auto;
+  text-align: center;
+  font-family: 'Inter', sans-serif;
+}
+
+.tryon-title {
+  margin-bottom: 20px;
+  font-size: 24px;
+  color: #333;
+  font-weight: 700;
+}
+
+.tryon-video-wrapper {
+  position: relative;
+  width: 640px;
+  height: 480px;
+  margin: auto;
+  border: 2px solid #ccc;
+  background-color: #000;
+  overflow: hidden;
+}
+
+.tryon-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.tryon-overlay {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  width: 150px;
+  transform: translate(-50%, -50%);
+  cursor: move;
+  z-index: 10;
+  pointer-events: auto;
+}
+
+.tryon-controls {
+  margin-top: 20px;
+}
+
+.tryon-controls button {
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+}
+
+.tryon-controls input[type="file"] {
+  margin-left: 15px;
+}
+

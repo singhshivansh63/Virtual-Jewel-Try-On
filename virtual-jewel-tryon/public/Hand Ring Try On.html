@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Virtual Ring Try-On</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      display: flex;
+      height: 100vh;
+      background-color: #eaeaea;
+    }
+
+    #left-panel {
+      width: 220px;
+      background-color: #fff;
+      border-right: 1px solid #ddd;
+      padding: 15px;
+      overflow-y: auto;
+      box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    }
+
+    #left-panel h3 {
+      text-align: center;
+      color: #333;
+    }
+
+    .ring-item {
+      cursor: pointer;
+      text-align: center;
+      margin-bottom: 20px;
+      transition: transform 0.2s ease;
+    }
+
+    .ring-item:hover {
+      transform: scale(1.05);
+    }
+
+    .ring-item img {
+      width: 80px;
+      height: auto;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+
+    .ring-item div {
+      margin-top: 5px;
+      font-size: 14px;
+      color: #444;
+    }
+
+    #main-view {
+      flex-grow: 1;
+      position: relative;
+      background-color: black;
+    }
+
+    video, canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    canvas {
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+
+<div id="left-panel">
+  <h3>Select Ring</h3>
+
+  <div class="ring-item" onclick="selectRing('https://i.ibb.co/F4wNz0tY/Chat-GPT-Image-May-25-2025-10-54-34-AM.png')">
+    <img src= "https://i.ibb.co/F4wNz0tY/Chat-GPT-Image-May-25-2025-10-54-34-AM.png" alt="ring-item">
+    <div>Gold Ring</div>
+  </div>
+
+  <div class="ring-item" onclick="selectRing('https://i.ibb.co/Rkp0WcSp/ring-PNG106.png')">
+    <img src="https://i.ibb.co/Rkp0WcSp/ring-PNG106.png" alt="ring-PNG106">
+    <div>Silver Ring</div>
+  </div>
+</div>
+
+<div id="main-view">
+  <video id="video" autoplay muted playsinline></video>
+  <canvas id="overlay"></canvas>
+</div>
+
+<!-- MediaPipe Hand Tracking & Camera Utils -->
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+
+<script>
+  const video = document.getElementById('video');
+  const canvas = document.getElementById('overlay');
+  const ctx = canvas.getContext('2d');
+
+  let ringImage = new Image();
+  ringImage.src = 'https://i.ibb.co/F4wNz0tY/Chat-GPT-Image-May-25-2025-10-54-34-AM.png'; // Default ring
+
+  function selectRing(url) {
+    ringImage.src = url;
+  }
+
+  function resizeCanvas() {
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+  }
+
+  const hands = new Hands({
+    locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+  });
+
+  hands.setOptions({
+    maxNumHands: 1,
+    modelComplexity: 1,
+    minDetectionConfidence: 0.7,
+    minTrackingConfidence: 0.7
+  });
+
+  hands.onResults(results => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+      const landmarks = results.multiHandLandmarks[0];
+
+      // Landmark indices for ring (e.g., base of middle finger)
+      const ringIndex = 10; // Middle finger PIP joint
+      const ringLandmark = landmarks[ringIndex];
+
+      const x = ringLandmark.x * canvas.width;
+      const y = ringLandmark.y * canvas.height;
+      const ringWidth = 50;
+      const ringHeight = 50;
+
+      ctx.drawImage(ringImage, x - ringWidth / 2, y - ringHeight / 2, ringWidth, ringHeight);
+    }
+  });
+
+  async function startCamera() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      video.srcObject = stream;
+
+      video.onloadedmetadata = () => {
+        resizeCanvas();
+        const camera = new Camera(video, {
+          onFrame: async () => {
+            await hands.send({ image: video });
+          },
+          width: video.videoWidth,
+          height: video.videoHeight
+        });
+        camera.start();
+      };
+    } catch (error) {
+      alert("Please allow access to your webcam to use the try-on feature.");
+      console.error("Camera error:", error);
+    }
+  }
+
+  startCamera();
+</script>
+
+</body>
+</html>

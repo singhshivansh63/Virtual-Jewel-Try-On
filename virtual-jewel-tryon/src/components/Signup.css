@@ -1,0 +1,89 @@
+/* Background */
+.signup-background {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: linear-gradient(to right, #f8f5f1, #ffffff);
+    font-family: 'Lato', sans-serif;
+  }
+  
+  /* Card */
+  .signup-card {
+    background: white;
+    padding: 40px 30px;
+    border-radius: 16px;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    border-top: 4px solid #d4af37; /* gold */
+  }
+  
+  /* Title */
+  .signup-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    margin-bottom: 8px;
+    color: #333;
+  }
+  
+  /* Subtext */
+  .signup-subtext {
+    font-size: 0.95rem;
+    color: #777;
+    margin-bottom: 25px;
+  }
+  
+  /* Input fields */
+  .signup-input {
+    width: 100%;
+    padding: 12px 14px;
+    margin-bottom: 18px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border 0.3s ease;
+  }
+  
+  .signup-input:focus {
+    border-color: #d4af37;
+    outline: none;
+  }
+  
+  /* Button */
+  .signup-button {
+    width: 100%;
+    padding: 12px;
+    background-color: #d4af37;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  
+  .signup-button:hover {
+    background-color: #c49f2e;
+  }
+  
+  /* Footer */
+  .signup-footer {
+    margin-top: 18px;
+    font-size: 0.9rem;
+    color: #555;
+  }
+  
+  /* Link */
+  .signup-link {
+    color: #d4af37;
+    text-decoration: none;
+    font-weight: bold;
+  }
+  
+  .signup-link:hover {
+    text-decoration: underline;
+  }
+  
